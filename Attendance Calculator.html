@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Attendance Calculator with Excel & PDF Download</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.05rem;
+        }
+        
+        .upload-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px dashed #bdc3c7;
+        }
+        
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background-color: #edf2f7;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .upload-note {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        #processBtn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        #processBtn:hover:not(:disabled) {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        #processBtn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #resetBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #resetBtn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        #downloadExcelBtn {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        #downloadExcelBtn:hover:not(:disabled) {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+        
+        #downloadExcelBtn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #downloadPdfBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #downloadPdfBtn:hover:not(:disabled) {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        #downloadPdfBtn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+        
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            position: sticky;
+            left: 0;
+            font-weight: 600;
+            border-right: 1px solid #34495e;
+            white-space: nowrap;
+        }
+        
+        th:first-child {
+            min-width: 180px;
+            text-align: left;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background-color: #2c3e50;
+        }
+        
+        th.summary-header {
+            background-color: #34495e;
+        }
+        
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        td.editable:hover {
+            background-color: #f0f7ff !important;
+            outline: 2px solid #3498db;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f7fd;
+        }
+        
+        .present {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            font-weight: 700;
+        }
+        
+        .half-day {
+            background-color: #fff9e6;
+            color: #f39c12;
+            font-weight: 700;
+        }
+        
+        .absent {
+            background-color: #fdeaea;
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .leave-cl {
+            background-color: #e8f6f3;
+            color: #1abc9c;
+            font-weight: 700;
+        }
+        
+        .leave-ml {
+            background-color: #f4ecf7;
+            color: #8e44ad;
+            font-weight: 700;
+        }
+        
+        .branch {
+            background-color: #eaf2f8;
+            color: #2980b9;
+            font-weight: 700;
+        }
+        
+        .manual-edit {
+            background-color: #fef9e7;
+            color: #f1c40f;
+            font-weight: 700;
+        }
+        
+        .status-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .status-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .present-color {
+            background-color: #d5f4e6;
+        }
+        
+        .half-day-color {
+            background-color: #fff9e6;
+        }
+        
+        .absent-color {
+            background-color: #fdeaea;
+        }
+        
+        .leave-cl-color {
+            background-color: #e8f6f3;
+        }
+        
+        .leave-ml-color {
+            background-color: #f4ecf7;
+        }
+        
+        .branch-color {
+            background-color: #eaf2f8;
+        }
+        
+        .manual-edit-color {
+            background-color: #fef9e7;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #95a5a6;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            background-color: #fdeaea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            background-color: #d5f4e6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .summary-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .filter-section {
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .filter-input, .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .instructions {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .instructions h3 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        /* Modal for manual adjustments */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-modal {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #95a5a6;
+        }
+        
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-select, .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #c0392b;
+        }
+        
+        .working-days-display {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .calculation-formula {
+            background-color: #e8f6f3;
+            border-left: 4px solid #1abc9c;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .calculation-formula h4 {
+            color: #1abc9c;
+            margin-bottom: 10px;
+        }
+        
+        .format-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .format-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .format-btn:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        
+        .format-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .format-btn.excel {
+            background-color: #27ae60;
+        }
+        
+        .format-btn.excel:hover:not(:disabled) {
+            background-color: #219653;
+        }
+        
+        .format-btn.pdf {
+            background-color: #e74c3c;
+        }
+        
+        .format-btn.pdf:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+            color: #3498db;
+        }
+        
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        
+        .pagination-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Virtual Scroll Table Container */
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+            position: relative;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .table-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #2c3e50;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover {
+            color: #3498db;
+        }
+        
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            background-color: #f8f9fa;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Department Summary */
+        .department-summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .department-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .department-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        button:focus, input:focus, select:focus {
+            outline: 3px solid #3498db;
+            outline-offset: 2px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            th:first-child {
+                min-width: 140px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .format-options {
+                flex-direction: column;
+            }
+            
+            .format-btn {
+                width: 100%;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+            
+            .tab-navigation {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+    <!-- Include SheetJS library for Excel parsing and generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Include jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Include FileSaver for saving files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Attendance Calculator with Excel & PDF Download</h1>
+        <p class="description">Upload your Excel punching report. Four punches = Full Day. Two punches = Half Day. 10.5+ hours worked = Full Day (until midnight).</p>
+        
+        <div class="instructions">
+            <h3>Attendance Rules & Working Days Calculation:</h3>
+            <ul>
+                <li><strong>P</strong> = Present (Full Day) = 1 working day. Conditions:
+                    <ul>
+                        <li>Four punches with valid timing: First punch ≤ 10:30 AM, Last punch until 11:30 PM</li>
+                        <li>OR 10.5+ hours worked (last punch extended until midnight)</li>
+                    </ul>
+                </li>
+                <li><strong>HD</strong> = Half Day (Only two punches) = 0.5 working day</li>
+                <li><strong>A</strong> = Absent (Missing punches or insufficient hours) = 0 working day</li>
+                <li><strong>CL</strong> = Casual Leave (1 working day)</li>
+                <li><strong>ML</strong> = Medical Leave (1 working day)</li>
+                <li><strong>BR</strong> = Branch Visit (1 working day)</li>
+                <li><strong>Manual Edit</strong> = Click any cell to adjust</li>
+            </ul>
+            <div class="calculation-formula">
+                <h4>Working Days Calculation Formula:</h4>
+                <p><strong>Total Working Days = (P × 1) + (HD × 0.5) + (CL × 1) + (ML × 1) + (BR × 1)</strong></p>
+                <p>Where: P = Present, HD = Half Day, CL = Casual Leave, ML = Medical Leave, Branch = Branch Visit</p>
+                <p><em>Note: Absent days (A) are not counted (0 days) but also NOT subtracted from total.</em></p>
+                <p><em>Individual employee working days are calculated using this formula. Result cannot be negative.</em></p>
+            </div>
+        </div>
+        
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea" role="button" aria-label="Upload area for Excel files" tabindex="0">
+                <div class="upload-icon">📊</div>
+                <p class="upload-text">Drag & drop your Excel punching report here or click to browse</p>
+                <p class="upload-note">Supported formats: Excel files (.xlsx, .xls) up to 10MB</p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" aria-label="Select Excel file">
+            </div>
+            
+            <div class="error-message" id="errorMessage" role="alert" aria-live="assertive"></div>
+            <div class="success-message" id="successMessage" role="alert" aria-live="polite"></div>
+            
+            <div class="filter-section" id="filterSection" style="display: none;">
+                <div class="filter-group">
+                    <label class="filter-label" for="employeeFilter">Employee Name:</label>
+                    <input type="text" id="employeeFilter" class="filter-input" placeholder="Filter by employee name...">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="departmentFilter">Department:</label>
+                    <select id="departmentFilter" class="filter-select">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="statusFilter">Status:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="P">Present</option>
+                        <option value="HD">Half Day</option>
+                        <option value="A">Absent</option>
+                        <option value="CL">Casual Leave</option>
+                        <option value="ML">Medical Leave</option>
+                        <option value="BR">Branch Visit</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="startDateFilter">Start Date:</label>
+                    <input type="date" id="startDateFilter" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="endDateFilter">End Date:</label>
+                    <input type="date" id="endDateFilter" class="filter-input">
+                </div>
+                <button id="applyFilterBtn" aria-label="Apply filters">Apply Filters</button>
+                <button id="clearFilterBtn" aria-label="Clear all filters">Clear Filters</button>
+            </div>
+            
+            <div class="controls">
+                <button id="processBtn" aria-label="Process attendance data">📊 Process Attendance</button>
+                <button id="downloadExcelBtn" disabled aria-label="Download Excel report">📥 Download Excel</button>
+                <button id="downloadPdfBtn" disabled aria-label="Download PDF report">📄 Download PDF</button>
+                <button id="resetBtn" aria-label="Reset all data">🔄 Reset All</button>
+            </div>
+            
+            <div class="loader" id="downloadLoader">
+                <div class="loader-spinner"></div>
+                <p>Generating report, please wait...</p>
+            </div>
+        </div>
+        
+        <div class="summary" id="summarySection" style="display: none;">
+            <div class="summary-item">
+                <div class="summary-value" id="totalEmployees">0</div>
+                <div class="summary-label">Total Employees</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="totalDays">0</div>
+                <div class="summary-label">Total Days</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="presentCount">0</div>
+                <div class="summary-label">Present Days</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="halfDayCount">0</div>
+                <div class="summary-label">Half Days</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="absentCount">0</div>
+                <div class="summary-label">Absent Days</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="workingDaysTotal">0</div>
+                <div class="summary-label">Total Working Days</div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation" id="tabNavigation" style="display: none;">
+            <button class="tab-btn active" data-tab="detailed" aria-label="View detailed attendance">📊 Detailed View</button>
+            <button class="tab-btn" data-tab="department" aria-label="View department summary">🏢 Department Summary</button>
+            <button class="tab-btn" data-tab="monthly" aria-label="View monthly summary">📅 Monthly Summary</button>
+            <button class="tab-btn" data-tab="employee" aria-label="View employee summary">👤 Employee Summary</button>
+        </div>
+
+        <!-- Detailed View Tab -->
+        <div class="tab-content active" id="detailedTab">
+            <div class="result-section" id="resultSection">
+                <div class="working-days-display" id="workingDaysDisplay">
+                    Total Working Days (All Employees): <span id="workingDaysCount">0</span>
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="status-item">
+                        <div class="status-color present-color"></div>
+                        <span>P = Present (1.0 day)</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-color half-day-color"></div>
+                        <span>HD = Half Day (0.5 day)</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-color absent-color"></div>
+                        <span>A = Absent (0.0 day)</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-color leave-cl-color"></div>
+                        <span>CL = Casual Leave (1.0 day)</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-color leave-ml-color"></div>
+                        <span>ML = Medical Leave (1.0 day)</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-color branch-color"></div>
+                        <span>BR = Branch Visit (1.0 day)</span>
+                    </div>
+                </div>
+                
+                <!-- Pagination Controls -->
+                <div class="pagination" id="paginationControls" style="display: none;">
+                    <div class="page-size-selector">
+                        <label for="pageSize">Rows per page:</label>
+                        <select id="pageSize" class="filter-select">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                        </select>
+                    </div>
+                    <button id="firstPageBtn" class="pagination-btn" aria-label="First page">«</button>
+                    <button id="prevPageBtn" class="pagination-btn" aria-label="Previous page">‹</button>
+                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                    <button id="nextPageBtn" class="pagination-btn" aria-label="Next page">›</button>
+                    <button id="lastPageBtn" class="pagination-btn" aria-label="Last page">»</button>
+                </div>
+                
+                <div class="table-container" id="tableContainer"></div>
+                
+                <div class="format-options" id="formatOptions">
+                    <button class="format-btn excel" id="quickExcelBtn" aria-label="Download Excel report">
+                        📊 Download Excel Report
+                    </button>
+                    <button class="format-btn pdf" id="quickPdfBtn" aria-label="Download PDF report">
+                        📄 Download PDF Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Summary Tab -->
+        <div class="tab-content" id="departmentTab">
+            <div class="department-summary" id="departmentSummary">
+                <h3>Department-wise Summary</h3>
+                <p>Loading department summary...</p>
+            </div>
+        </div>
+
+        <!-- Monthly Summary Tab -->
+        <div class="tab-content" id="monthlyTab">
+            <div class="department-summary" id="monthlySummary">
+                <h3>Monthly Attendance Summary</h3>
+                <p>Loading monthly summary...</p>
+            </div>
+        </div>
+
+        <!-- Employee Summary Tab -->
+        <div class="tab-content" id="employeeTab">
+            <div class="department-summary" id="employeeSummary">
+                <h3>Employee Performance Summary</h3>
+                <p>Loading employee summary...</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Advanced Attendance Calculator v9.0 | Download in Excel & PDF | Working Days = (P×1) + (HD×0.5) + (CL×1) + (ML×1) + (BR×1)</p>
+            <p style="font-size: 0.8rem; margin-top: 5px;">Data is stored locally in your browser. Refresh or close to clear.</p>
+        </div>
+    </div>
+
+    <!-- Modal for manual adjustments -->
+    <div class="modal" id="adjustmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Manual Attendance Adjustment</div>
+                <div class="close-modal" id="closeModal" aria-label="Close modal">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-label" id="modalEmployeeInfo">Employee: </div>
+                    <div class="form-label" id="modalDateInfo">Date: </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="attendanceStatus">Attendance Status:</label>
+                    <select class="form-select" id="attendanceStatus">
+                        <option value="P">Present (Full Day = 1.0 working day)</option>
+                        <option value="HD">Half Day (0.5 working day)</option>
+                        <option value="A">Absent (0 working day)</option>
+                        <option value="CL">Casual Leave (1.0 working day)</option>
+                        <option value="ML">Medical Leave (1.0 working day)</option>
+                        <option value="BR">Branch Visit (1.0 working day)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="branchCodeGroup" style="display: none;">
+                    <label class="form-label" for="branchCode">Branch Code:</label>
+                    <input type="text" class="form-input" id="branchCode" placeholder="Enter branch code (e.g., BR001)">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="remarks">Remarks/Notes:</label>
+                    <input type="text" class="form-input" id="remarks" placeholder="Optional remarks">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Original Punch Data:</div>
+                    <div id="originalPunchData" style="background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-size: 0.9rem;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-reset" id="resetToOriginalBtn" aria-label="Reset to original data">Reset to Original</button>
+                <button class="btn btn-secondary" id="cancelBtn" aria-label="Cancel changes">Cancel</button>
+                <button class="btn btn-primary" id="saveBtn" aria-label="Save changes">Save Adjustment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Main Application Class
+        class AttendanceCalculator {
+            constructor() {
+                // Initialize jsPDF
+                this.jsPDF = window.jspdf.jsPDF;
+                
+                // DOM Elements
+                this.elements = this.cacheDOM();
+                
+                // Data structures
+                this.attendanceData = [];
+                this.dates = [];
+                this.employees = [];
+                this.filteredData = [];
+                this.departments = new Set();
+                this.currentEdit = { employeeIndex: -1, dateIndex: -1 };
+                
+                // Pagination
+                this.currentPage = 1;
+                this.itemsPerPage = 50;
+                this.totalPages = 1;
+                
+                // State management
+                this.state = {
+                    fileLoaded: false,
+                    dataProcessed: false,
+                    filtersApplied: false
+                };
+                
+                // Initialize
+                this.init();
+            }
+            
+            cacheDOM() {
+                return {
+                    // File upload
+                    fileInput: document.getElementById('fileInput'),
+                    uploadArea: document.getElementById('uploadArea'),
+                    processBtn: document.getElementById('processBtn'),
+                    
+                    // Buttons
+                    resetBtn: document.getElementById('resetBtn'),
+                    downloadExcelBtn: document.getElementById('downloadExcelBtn'),
+                    downloadPdfBtn: document.getElementById('downloadPdfBtn'),
+                    quickExcelBtn: document.getElementById('quickExcelBtn'),
+                    quickPdfBtn: document.getElementById('quickPdfBtn'),
+                    
+                    // Messages
+                    errorMessage: document.getElementById('errorMessage'),
+                    successMessage: document.getElementById('successMessage'),
+                    
+                    // Sections
+                    resultSection: document.getElementById('resultSection'),
+                    summarySection: document.getElementById('summarySection'),
+                    tableContainer: document.getElementById('tableContainer'),
+                    filterSection: document.getElementById('filterSection'),
+                    formatOptions: document.getElementById('formatOptions'),
+                    tabNavigation: document.getElementById('tabNavigation'),
+                    
+                    // Filters
+                    employeeFilter: document.getElementById('employeeFilter'),
+                    departmentFilter: document.getElementById('departmentFilter'),
+                    statusFilter: document.getElementById('statusFilter'),
+                    startDateFilter: document.getElementById('startDateFilter'),
+                    endDateFilter: document.getElementById('endDateFilter'),
+                    applyFilterBtn: document.getElementById('applyFilterBtn'),
+                    clearFilterBtn: document.getElementById('clearFilterBtn'),
+                    
+                    // Loader
+                    downloadLoader: document.getElementById('downloadLoader'),
+                    
+                    // Modal
+                    adjustmentModal: document.getElementById('adjustmentModal'),
+                    closeModal: document.getElementById('closeModal'),
+                    cancelBtn: document.getElementById('cancelBtn'),
+                    saveBtn: document.getElementById('saveBtn'),
+                    resetToOriginalBtn: document.getElementById('resetToOriginalBtn'),
+                    modalEmployeeInfo: document.getElementById('modalEmployeeInfo'),
+                    modalDateInfo: document.getElementById('modalDateInfo'),
+                    attendanceStatus: document.getElementById('attendanceStatus'),
+                    branchCodeGroup: document.getElementById('branchCodeGroup'),
+                    branchCode: document.getElementById('branchCode'),
+                    remarks: document.getElementById('remarks'),
+                    originalPunchData: document.getElementById('originalPunchData'),
+                    
+                    // Pagination
+                    paginationControls: document.getElementById('paginationControls'),
+                    firstPageBtn: document.getElementById('firstPageBtn'),
+                    prevPageBtn: document.getElementById('prevPageBtn'),
+                    nextPageBtn: document.getElementById('nextPageBtn'),
+                    lastPageBtn: document.getElementById('lastPageBtn'),
+                    pageInfo: document.getElementById('pageInfo'),
+                    pageSize: document.getElementById('pageSize'),
+                    
+                    // Tabs
+                    tabBtns: document.querySelectorAll('.tab-btn'),
+                    tabContents: document.querySelectorAll('.tab-content'),
+                    
+                    // Summary containers
+                    departmentSummary: document.getElementById('departmentSummary'),
+                    monthlySummary: document.getElementById('monthlySummary'),
+                    employeeSummary: document.getElementById('employeeSummary')
+                };
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.loadFromStorage();
+                this.setupAccessibility();
+            }
+            
+            setupEventListeners() {
+                // File upload
+                this.elements.uploadArea.addEventListener('click', () => this.elements.fileInput.click());
+                this.elements.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+                this.elements.uploadArea.addEventListener('dragleave', () => this.handleDragLeave());
+                this.elements.uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+                this.elements.fileInput.addEventListener('change', () => this.handleFileSelect());
+                
+                // Process button
+                this.elements.processBtn.addEventListener('click', () => this.processExcelFile());
+                
+                // Reset button
+                this.elements.resetBtn.addEventListener('click', () => this.resetApp());
+                
+                // Download buttons
+                this.elements.downloadExcelBtn.addEventListener('click', () => this.downloadExcel());
+                this.elements.downloadPdfBtn.addEventListener('click', () => this.downloadPdf());
+                this.elements.quickExcelBtn.addEventListener('click', () => this.downloadExcel());
+                this.elements.quickPdfBtn.addEventListener('click', () => this.downloadPdf());
+                
+                // Filters
+                this.elements.applyFilterBtn.addEventListener('click', () => this.applyFilters());
+                this.elements.clearFilterBtn.addEventListener('click', () => this.clearFilters());
+                
+                // Modal
+                this.elements.closeModal.addEventListener('click', () => this.closeAdjustmentModal());
+                this.elements.cancelBtn.addEventListener('click', () => this.closeAdjustmentModal());
+                this.elements.saveBtn.addEventListener('click', () => this.saveAdjustment());
+                this.elements.resetToOriginalBtn.addEventListener('click', () => this.resetToOriginal());
+                this.elements.attendanceStatus.addEventListener('change', () => this.toggleBranchCodeField());
+                
+                // Pagination
+                this.elements.firstPageBtn.addEventListener('click', () => this.goToPage(1));
+                this.elements.prevPageBtn.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+                this.elements.nextPageBtn.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+                this.elements.lastPageBtn.addEventListener('click', () => this.goToPage(this.totalPages));
+                this.elements.pageSize.addEventListener('change', () => this.changePageSize());
+                
+                // Tabs
+                this.elements.tabBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+                
+                // Input sanitization
+                this.setupInputSanitization();
+            }
+            
+            setupAccessibility() {
+                // Add ARIA labels
+                this.elements.uploadArea.setAttribute('role', 'button');
+                this.elements.uploadArea.setAttribute('tabindex', '0');
+                this.elements.uploadArea.setAttribute('aria-label', 'Upload area for Excel files');
+                
+                // Keyboard navigation for upload area
+                this.elements.uploadArea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.elements.fileInput.click();
+                    }
+                });
+            }
+            
+            setupInputSanitization() {
+                // Sanitize inputs
+                const sanitizeInput = (input) => {
+                    return input.replace(/[<>]/g, '');
+                };
+                
+                // Apply to all inputs
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        e.target.value = sanitizeInput(e.target.value);
+                    });
+                });
+            }
+            
+            // ========== FILE HANDLING ==========
+            
+            handleFileSelect() {
+                this.showError('');
+                this.showSuccess('');
+                
+                if (!this.elements.fileInput.files.length) {
+                    this.showError('Please select a file first.');
+                    return;
+                }
+                
+                const file = this.elements.fileInput.files[0];
+                const fileName = file.name;
+                
+                // 1. File type validation
+                if (!fileName.match(/\.(xlsx|xls)$/i)) {
+                    this.showError('Please upload Excel files only (.xlsx, .xls)');
+                    this.resetFileInput();
+                    return;
+                }
+                
+                // 2. File size validation (10MB limit)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    this.showError('File size exceeds 10MB limit. Please upload a smaller file.');
+                    this.resetFileInput();
+                    return;
+                }
+                
+                // Update UI
+                this.elements.uploadArea.innerHTML = `
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-text">File selected: ${fileName}</p>
+                    <p class="upload-note">Click "Process Attendance" to calculate attendance</p>
+                `;
+                
+                this.elements.processBtn.disabled = false;
+                this.state.fileLoaded = true;
+            }
+            
+            handleDragOver(e) {
+                e.preventDefault();
+                this.elements.uploadArea.style.backgroundColor = '#e3f2fd';
+            }
+            
+            handleDragLeave() {
+                this.elements.uploadArea.style.backgroundColor = '';
+            }
+            
+            handleDrop(e) {
+                e.preventDefault();
+                this.elements.uploadArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length) {
+                    this.elements.fileInput.files = e.dataTransfer.files;
+                    this.handleFileSelect();
+                }
+            }
+            
+            resetFileInput() {
+                this.elements.fileInput.value = '';
+                this.elements.uploadArea.innerHTML = `
+                    <div class="upload-icon">📊</div>
+                    <p class="upload-text">Drag & drop your Excel punching report here or click to browse</p>
+                    <p class="upload-note">Supported formats: Excel files (.xlsx, .xls) up to 10MB</p>
+                `;
+                this.elements.processBtn.disabled = true;
+                this.state.fileLoaded = false;
+            }
+            
+            // ========== DATA PROCESSING ==========
+            
+            async processExcelFile() {
+                this.showError('');
+                this.showSuccess('');
+                
+                if (!this.state.fileLoaded) {
+                    this.showError('Please select a file first.');
+                    return;
+                }
+                
+                // Show processing state
+                this.elements.processBtn.innerHTML = 'Processing...';
+                this.elements.processBtn.disabled = true;
+                
+                try {
+                    const file = this.elements.fileInput.files[0];
+                    const data = await this.readFileAsArrayBuffer(file);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Process the data
+                    this.processExcelData(workbook);
+                    
+                    // Display results
+                    this.displayAttendanceTable();
+                    this.updateSummary();
+                    this.updateDepartmentSummary();
+                    this.updateMonthlySummary();
+                    this.updateEmployeeSummary();
+                    
+                    // Show UI elements
+                    this.showResultSections();
+                    
+                    // Enable download buttons
+                    this.elements.downloadExcelBtn.disabled = false;
+                    this.elements.downloadPdfBtn.disabled = false;
+                    this.elements.quickExcelBtn.disabled = false;
+                    this.elements.quickPdfBtn.disabled = false;
+                    
+                    this.showSuccess(`Attendance processed successfully! ${this.attendanceData.length} employees, ${this.dates.length} days`);
+                    
+                    // Save to storage
+                    this.saveToStorage();
+                    
+                } catch (error) {
+                    this.handleProcessingError(error);
+                } finally {
+                    this.elements.processBtn.innerHTML = '📊 Process Attendance';
+                    this.elements.processBtn.disabled = !this.state.fileLoaded;
+                }
+            }
+            
+            readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Error reading file'));
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            processExcelData(workbook) {
+                // Reset data structures
+                this.attendanceData = [];
+                this.dates = [];
+                this.employees = [];
+                this.departments = new Set();
+                
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (!jsonData || jsonData.length < 2) {
+                    throw new Error('Excel file is empty or has insufficient data.');
+                }
+                
+                const headers = jsonData[0];
+                
+                // Find column indices with enhanced detection for your specific Excel format
+                const columnIndices = this.detectColumns(headers);
+                
+                // Validate required columns
+                if (columnIndices.employee === -1) {
+                    throw new Error('Employee name column not found in Excel file.');
+                }
+                
+                // Process each row
+                const employeeMap = new Map();
+                const dateSet = new Set();
+                
+                for (let i = 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    const employeeData = this.extractEmployeeData(row, columnIndices);
+                    if (!employeeData.name || !employeeData.dateStr) continue;
+                    
+                    // Parse date
+                    const dateObj = this.parseDate(employeeData.dateStr);
+                    if (!dateObj || isNaN(dateObj.getTime())) {
+                        console.warn(`Invalid date: ${employeeData.dateStr} for ${employeeData.name}`);
+                        continue;
+                    }
+                    
+                    // Format date for display
+                    const formattedDate = this.formatDate(dateObj);
+                    dateSet.add(formattedDate);
+                    
+                    // Store department if available
+                    if (employeeData.department) {
+                        this.departments.add(employeeData.department);
+                    }
+                    
+                    // Process attendance record with punch-based rules including 10.5+ hour rule
+                    this.processAttendanceRecord(employeeMap, employeeData, formattedDate, dateObj);
+                }
+                
+                // Check if we have data
+                if (employeeMap.size === 0) {
+                    throw new Error('No valid employee data found.');
+                }
+                
+                // Convert to arrays and sort
+                this.dates = Array.from(dateSet).sort((a, b) => {
+                    return this.parseDisplayDate(a) - this.parseDisplayDate(b);
+                });
+                
+                this.employees = Array.from(employeeMap.values()).sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+                
+                // Create attendanceData array
+                this.createAttendanceDataArray(employeeMap);
+                
+                // Set initial filtered data
+                this.filteredData = [...this.attendanceData];
+                
+                // Update department filter
+                this.updateDepartmentFilter();
+                
+                // Set default date filters
+                this.setDefaultDateFilters();
+                
+                this.state.dataProcessed = true;
+            }
+            
+            detectColumns(headers) {
+                const indices = {
+                    empCode: -1,
+                    employee: -1,
+                    date: -1,
+                    department: -1,
+                    branch: -1,
+                    // Punch columns
+                    in1: -1,   // Column G
+                    out1: -1,  // Column H
+                    in2: -1,   // Column I
+                    out2: -1,  // Column J
+                    in3: -1,   // Column K
+                    out3: -1,  // Column L
+                    in4: -1,   // Column M
+                    out4: -1,  // Column N
+                    totalWorkingHrs: -1,  // Column Q
+                    outPunch: -1,         // Column T
+                    loginTime: -1,        // Column U
+                    logoutTime: -1,       // Column V
+                    lateBy: -1,           // Column W
+                    earlyGoing: -1        // Column X
+                };
+                
+                headers.forEach((header, index) => {
+                    if (!header) return;
+                    
+                    const headerStr = header.toString().toLowerCase();
+                    
+                    if (headerStr.includes('empcode') || headerStr.includes('emp code') || 
+                        headerStr.includes('employee code') || headerStr.includes('id')) {
+                        indices.empCode = index;
+                    } else if (headerStr.includes('employee') || headerStr.includes('name') || 
+                               headerStr.includes('emp name')) {
+                        indices.employee = index;
+                    } else if (headerStr.includes('date') || headerStr.includes('attendance date')) {
+                        indices.date = index;
+                    } else if (headerStr.includes('designation') || headerStr.includes('department')) {
+                        indices.department = index;
+                    } else if (headerStr.includes('branch')) {
+                        indices.branch = index;
+                    } else if ((headerStr.includes('in') || headerStr === 'in') && index === 6) { // Column G
+                        indices.in1 = index;
+                    } else if ((headerStr.includes('out') || headerStr === 'out') && index === 7) { // Column H
+                        indices.out1 = index;
+                    } else if (headerStr === 'in' && index === 8) { // Column I
+                        indices.in2 = index;
+                    } else if (headerStr === 'out' && index === 9) { // Column J
+                        indices.out2 = index;
+                    } else if (headerStr === 'in' && index === 10) { // Column K
+                        indices.in3 = index;
+                    } else if (headerStr === 'out' && index === 11) { // Column L
+                        indices.out3 = index;
+                    } else if (headerStr === 'in' && index === 12) { // Column M
+                        indices.in4 = index;
+                    } else if (headerStr === 'out' && index === 13) { // Column N
+                        indices.out4 = index;
+                    } else if (headerStr.includes('totalworkinghrs') || headerStr.includes('total working')) {
+                        indices.totalWorkingHrs = index;
+                    } else if (headerStr.includes('outpunch') || headerStr.includes('out punch')) {
+                        indices.outPunch = index;
+                    } else if (headerStr.includes('logintime') || headerStr.includes('login time')) {
+                        indices.loginTime = index;
+                    } else if (headerStr.includes('logouttime') || headerStr.includes('logout time')) {
+                        indices.logoutTime = index;
+                    } else if (headerStr.includes('lateby') || headerStr.includes('late by')) {
+                        indices.lateBy = index;
+                    } else if (headerStr.includes('earlygoing') || headerStr.includes('early going')) {
+                        indices.earlyGoing = index;
+                    }
+                });
+                
+                return indices;
+            }
+            
+            extractEmployeeData(row, indices) {
+                return {
+                    empCode: indices.empCode !== -1 ? (row[indices.empCode] || '').toString().trim() : '',
+                    name: indices.employee !== -1 ? (row[indices.employee] || '').toString().trim() : '',
+                    department: indices.department !== -1 ? (row[indices.department] || '').toString().trim() : '',
+                    dateStr: indices.date !== -1 ? (row[indices.date] || '').toString().trim() : '',
+                    branch: indices.branch !== -1 ? (row[indices.branch] || '').toString().trim() : '',
+                    
+                    // Punch data
+                    in1: indices.in1 !== -1 ? (row[indices.in1] || '').toString().trim() : '',
+                    out1: indices.out1 !== -1 ? (row[indices.out1] || '').toString().trim() : '',
+                    in2: indices.in2 !== -1 ? (row[indices.in2] || '').toString().trim() : '',
+                    out2: indices.out2 !== -1 ? (row[indices.out2] || '').toString().trim() : '',
+                    in3: indices.in3 !== -1 ? (row[indices.in3] || '').toString().trim() : '',
+                    out3: indices.out3 !== -1 ? (row[indices.out3] || '').toString().trim() : '',
+                    in4: indices.in4 !== -1 ? (row[indices.in4] || '').toString().trim() : '',
+                    out4: indices.out4 !== -1 ? (row[indices.out4] || '').toString().trim() : '',
+                    
+                    // Additional data
+                    totalWorkingHrs: indices.totalWorkingHrs !== -1 ? (row[indices.totalWorkingHrs] || '').toString().trim() : '',
+                    outPunch: indices.outPunch !== -1 ? (row[indices.outPunch] || '').toString().trim() : '',
+                    loginTime: indices.loginTime !== -1 ? (row[indices.loginTime] || '').toString().trim() : '',
+                    logoutTime: indices.logoutTime !== -1 ? (row[indices.logoutTime] || '').toString().trim() : '',
+                    lateBy: indices.lateBy !== -1 ? (row[indices.lateBy] || '').toString().trim() : '',
+                    earlyGoing: indices.earlyGoing !== -1 ? (row[indices.earlyGoing] || '').toString().trim() : ''
+                };
+            }
+            
+            processAttendanceRecord(employeeMap, employeeData, formattedDate, dateObj) {
+                if (!employeeMap.has(employeeData.name)) {
+                    employeeMap.set(employeeData.name, {
+                        empCode: employeeData.empCode,
+                        name: employeeData.name,
+                        department: employeeData.department,
+                        attendance: new Map()
+                    });
+                }
+                
+                const employee = employeeMap.get(employeeData.name);
+                
+                // Collect all punches (4 pairs: In/Out, In/Out, In/Out, In/Out)
+                const punches = [];
+                
+                // Extract punches from columns
+                const punchPairs = [
+                    employeeData.in1, employeeData.out1,
+                    employeeData.in2, employeeData.out2,
+                    employeeData.in3, employeeData.out3,
+                    employeeData.in4, employeeData.out4
+                ];
+                
+                // Filter out empty punches
+                const validPunches = punchPairs.filter(punch => 
+                    punch && punch.trim() && punch !== '-' && punch !== '' && punch !== 'Missing'
+                );
+                
+                // Extract total working hours as decimal
+                const totalHours = this.extractHoursDecimalFromString(employeeData.totalWorkingHrs);
+                
+                // Determine attendance status based on punch rules
+                let status = 'A'; // Default absent
+                let remarks = '';
+                
+                // RULE 1: Check for missing punches
+                if (employeeData.outPunch && employeeData.outPunch === 'Missing') {
+                    status = 'A';
+                    remarks = 'Missing punch';
+                }
+                // RULE 2: 10.5+ HOUR RULE - If worked 10.5+ hours = Full Day (last punch extended until midnight)
+                else if (totalHours >= 10.5) {
+                    status = 'P'; // Full day
+                    remarks = `Worked ${totalHours.toFixed(1)} hours (10.5+ hour rule)`;
+                }
+                // RULE 3: 4 PUNCHES RULE - Exactly 4 punches required for full day
+                else if (validPunches.length === 4) {
+                    // Check start time (first punch) - must be by 10:30 AM
+                    const firstPunch = validPunches[0];
+                    const lastPunch = validPunches[3];
+                    
+                    const firstTime = this.convertTo24Hour(firstPunch);
+                    const lastTime = this.convertTo24Hour(lastPunch);
+                    
+                    // Check if first punch is by 10:30 AM (630 minutes) and last punch is acceptable (until 11:30 PM = 1410 minutes)
+                    if (firstTime <= this.timeToMinutes('10:30') && 
+                        this.isValidEndTimeFor4Punches(lastTime)) {
+                        status = 'P'; // Full day
+                        remarks = '4 punches with valid timing';
+                    } else {
+                        status = 'HD'; // Half day if time conditions not met
+                        remarks = '4 punches but invalid timing';
+                    }
+                } 
+                // RULE 4: Only 2 punches = Half day
+                else if (validPunches.length === 2) {
+                    status = 'HD';
+                    remarks = 'Only 2 punches';
+                }
+                // RULE 5: Fallback - Check total working hours for other cases
+                else {
+                    // Check if there are any punches at all
+                    if (validPunches.length > 0) {
+                        if (totalHours >= 8) {
+                            status = 'P';
+                            remarks = `Based on hours: ${totalHours.toFixed(1)}`;
+                        } else if (totalHours >= 4) {
+                            status = 'HD';
+                            remarks = `Based on hours: ${totalHours.toFixed(1)}`;
+                        } else {
+                            status = 'A';
+                            remarks = `Insufficient hours: ${totalHours.toFixed(1)}`;
+                        }
+                    } else {
+                        status = 'A';
+                        remarks = 'No valid punches';
+                    }
+                }
+                
+                // Store attendance
+                employee.attendance.set(formattedDate, {
+                    status: status,
+                    originalStatus: status,
+                    details: {
+                        punches: validPunches,
+                        totalWorkingHrs: employeeData.totalWorkingHrs || '',
+                        totalHoursDecimal: totalHours,
+                        outPunch: employeeData.outPunch || '',
+                        loginTime: employeeData.loginTime || '',
+                        logoutTime: employeeData.logoutTime || '',
+                        lateBy: employeeData.lateBy || '',
+                        earlyGoing: employeeData.earlyGoing || '',
+                        isManual: false,
+                        remarks: remarks
+                    },
+                    branchCode: employeeData.branch || '',
+                    dateObj: dateObj
+                });
+            }
+            
+            // ========== PUNCH TIME UTILITIES ==========
+            
+            convertTo24Hour(timeStr) {
+                if (!timeStr) return 0;
+                
+                // Remove any spaces and convert to uppercase
+                timeStr = timeStr.toString().trim().toUpperCase();
+                
+                // Check if already in 24-hour format (contains ':')
+                if (timeStr.includes(':')) {
+                    const parts = timeStr.split(' ');
+                    let timePart = parts[0];
+                    let period = parts[1];
+                    
+                    // Handle cases like "09:25 AM" or "13:25"
+                    const [hours, minutes] = timePart.split(':').map(Number);
+                    
+                    if (period === 'PM' && hours < 12) {
+                        return (hours + 12) * 60 + minutes;
+                    } else if (period === 'AM' && hours === 12) {
+                        return minutes; // 12:xx AM = 0:xx
+                    } else {
+                        return hours * 60 + minutes;
+                    }
+                }
+                
+                return 0;
+            }
+            
+            timeToMinutes(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+            
+            // For 4-punch rule: last punch acceptable until 11:30 PM
+            isValidEndTimeFor4Punches(minutes) {
+                // Acceptable until 11:30 PM = 23:30 = 1410 minutes
+                const maxEndTime = 23 * 60 + 30; // 1410 minutes
+                
+                // Convert to 24-hour format for comparison
+                if (minutes > 12 * 60) { // PM time
+                    return minutes <= maxEndTime;
+                } else { // AM time (next day)
+                    // Add 24 hours for comparison
+                    return (minutes + 24 * 60) <= maxEndTime;
+                }
+            }
+            
+            // For 10.5+ hour rule: last punch extended until midnight
+            isValidEndTimeFor105HourRule(minutes) {
+                // Acceptable until midnight = 24:00 = 1440 minutes
+                const maxEndTime = 24 * 60; // 1440 minutes
+                
+                // Convert to 24-hour format for comparison
+                if (minutes > 12 * 60) { // PM time
+                    return minutes <= maxEndTime;
+                } else { // AM time (next day)
+                    // Add 24 hours for comparison
+                    return (minutes + 24 * 60) <= maxEndTime;
+                }
+            }
+            
+            extractHoursDecimalFromString(timeStr) {
+                if (!timeStr) return 0;
+                
+                // Extract hours, minutes, seconds from "13 hr 49 m 03 s" format
+                const hrMatch = timeStr.match(/(\d+)\s*hr/);
+                const minMatch = timeStr.match(/(\d+)\s*m/);
+                const secMatch = timeStr.match(/(\d+)\s*s/);
+                
+                const hours = hrMatch ? parseInt(hrMatch[1]) : 0;
+                const minutes = minMatch ? parseInt(minMatch[1]) : 0;
+                const seconds = secMatch ? parseInt(secMatch[1]) : 0;
+                
+                // Convert to decimal hours
+                return hours + (minutes / 60) + (seconds / 3600);
+            }
+            
+            // ========== DATE UTILITIES ==========
+            
+            parseDate(dateStr) {
+                // Remove any non-numeric characters except slashes and dashes
+                dateStr = dateStr.toString().replace(/[^\d\/\-\.]/g, ' ').trim();
+                
+                const formats = [
+                    /(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/, // DD-MM-YYYY
+                    /(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/, // YYYY-MM-DD
+                    /(\d{1,2})[-\/](\d{1,2})[-\/](\d{2})/, // DD-MM-YY
+                    /(\d{1,2})\.(\d{1,2})\.(\d{4})/, // DD.MM.YYYY
+                ];
+                
+                for (const format of formats) {
+                    const match = dateStr.match(format);
+                    if (match) {
+                        let day, month, year;
+                        
+                        if (match[1].length === 4) {
+                            year = parseInt(match[1]);
+                            month = parseInt(match[2]) - 1;
+                            day = parseInt(match[3]);
+                        } else if (match[3].length === 4) {
+                            day = parseInt(match[1]);
+                            month = parseInt(match[2]) - 1;
+                            year = parseInt(match[3]);
+                        } else {
+                            day = parseInt(match[1]);
+                            month = parseInt(match[2]) - 1;
+                            year = 2000 + parseInt(match[3]);
+                        }
+                        
+                        return new Date(year, month, day);
+                    }
+                }
+                
+                // Try standard parsing
+                const parsed = new Date(dateStr);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+            
+            formatDate(date) {
+                const day = date.getDate().toString().padStart(2, '0');
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const month = monthNames[date.getMonth()];
+                const year = date.getFullYear().toString().slice(-2);
+                return `${day}-${month}-${year}`;
+            }
+            
+            parseDisplayDate(dateStr) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0]);
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const month = monthNames.indexOf(parts[1]);
+                    let year = parseInt(parts[2]);
+                    
+                    if (year < 100) year = 2000 + year;
+                    return new Date(year, month, day);
+                }
+                return new Date(dateStr);
+            }
+            
+            // ========== DISPLAY FUNCTIONS ==========
+            
+            displayAttendanceTable() {
+                this.applyFilters();
+                
+                // Calculate pagination
+                const totalItems = this.filteredData.length;
+                this.totalPages = Math.ceil(totalItems / this.itemsPerPage);
+                this.currentPage = Math.min(this.currentPage, this.totalPages);
+                
+                // Get paginated data
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                const paginatedData = this.filteredData.slice(startIndex, endIndex);
+                
+                if (paginatedData.length === 0) {
+                    this.elements.tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #7f8c8d;">No data matches the current filters.</p>';
+                    this.elements.paginationControls.style.display = 'none';
+                    return;
+                }
+                
+                // Build table
+                let tableHTML = `<table>
+                    <thead>
+                        <tr class="table-header">
+                            <th>Emp Code</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>`;
+                
+                // Add date headers
+                this.dates.forEach(date => {
+                    tableHTML += `<th>${date}</th>`;
+                });
+                
+                // Add summary headers
+                tableHTML += `<th class="summary-header">P</th>
+                              <th class="summary-header">HD</th>
+                              <th class="summary-header">A</th>
+                              <th class="summary-header">CL</th>
+                              <th class="summary-header">ML</th>
+                              <th class="summary-header">BR</th>
+                              <th class="summary-header">WD</th>`;
+                
+                tableHTML += `</tr></thead><tbody>`;
+                
+                // Add employee rows
+                paginatedData.forEach((employee, empIndex) => {
+                    const empSummary = this.calculateEmployeeSummary(employee);
+                    const globalEmpIndex = startIndex + empIndex;
+                    
+                    tableHTML += `<tr>
+                        <td>${employee.empCode || ''}</td>
+                        <td>${employee.name}</td>
+                        <td>${employee.department || ''}</td>`;
+                    
+                    // Add attendance cells
+                    this.dates.forEach((date, dateIndex) => {
+                        const attendance = employee.attendance[dateIndex];
+                        const cellData = this.buildTableCell(attendance, globalEmpIndex, dateIndex);
+                        tableHTML += cellData;
+                    });
+                    
+                    // Add summary cells with CORRECTED calculation
+                    tableHTML += this.buildSummaryCells(empSummary);
+                    
+                    tableHTML += `</tr>`;
+                });
+                
+                tableHTML += `</tbody></table>`;
+                
+                this.elements.tableContainer.innerHTML = tableHTML;
+                this.setupCellClickListeners();
+                this.updatePaginationControls();
+            }
+            
+            buildTableCell(attendance, empIndex, dateIndex) {
+                let statusClass = '';
+                let displayText = attendance?.status || 'A';
+                
+                switch(displayText) {
+                    case 'P': statusClass = 'present'; break;
+                    case 'HD': statusClass = 'half-day'; break;
+                    case 'A': statusClass = 'absent'; break;
+                    case 'CL': statusClass = 'leave-cl'; break;
+                    case 'ML': statusClass = 'leave-ml'; break;
+                    case 'BR': 
+                        statusClass = 'branch';
+                        displayText = attendance?.branchCode || 'BR';
+                        break;
+                    default: statusClass = 'absent';
+                }
+                
+                if (attendance?.details?.isManual) {
+                    statusClass += ' manual-edit';
+                }
+                
+                // Enhanced tooltip with punch details
+                let tooltip = '';
+                if (attendance?.details?.punches && attendance.details.punches.length > 0) {
+                    tooltip = `Punches: ${attendance.details.punches.join(', ')}\\n`;
+                }
+                if (attendance?.details?.totalWorkingHrs) {
+                    tooltip += `Total Hrs: ${attendance.details.totalWorkingHrs}\\n`;
+                    if (attendance.details.totalHoursDecimal >= 10.5) {
+                        tooltip += `✓ 10.5+ hour rule applied\\n`;
+                    }
+                }
+                if (attendance?.details?.outPunch && attendance.details.outPunch !== '-') {
+                    tooltip += `OutPunch: ${attendance.details.outPunch}\\n`;
+                }
+                if (attendance?.details?.lateBy && attendance.details.lateBy !== '00:00:00') {
+                    tooltip += `Late By: ${attendance.details.lateBy}\\n`;
+                }
+                if (attendance?.details?.earlyGoing && attendance.details.earlyGoing !== '-') {
+                    tooltip += `Early Going: ${attendance.details.earlyGoing}\\n`;
+                }
+                if (attendance?.details?.remarks) {
+                    tooltip += `Remarks: ${attendance.details.remarks}`;
+                }
+                
+                return `<td class="${statusClass} editable" 
+                        data-emp="${empIndex}" 
+                        data-date="${dateIndex}"
+                        title="${tooltip}"
+                        aria-label="${displayText} for employee">
+                        ${displayText}
+                      </td>`;
+            }
+            
+            buildSummaryCells(summary) {
+                // CORRECTED FORMULA: Working Days = P + (HD × 0.5) + CL + ML + BR
+                // Absent days are NOT subtracted
+                const workingDays = (summary.P * 1) + 
+                                   (summary.HD * 0.5) + 
+                                   (summary.CL * 1) + 
+                                   (summary.ML * 1) + 
+                                   (summary.BR * 1);
+                
+                return `<td class="present summary-cell">${summary.P}</td>
+                        <td class="half-day summary-cell">${summary.HD}</td>
+                        <td class="absent summary-cell">${summary.A}</td>
+                        <td class="leave-cl summary-cell">${summary.CL}</td>
+                        <td class="leave-ml summary-cell">${summary.ML}</td>
+                        <td class="branch summary-cell">${summary.BR}</td>
+                        <td class="summary-cell" style="font-weight: bold; background-color: #e8f6f3;">${workingDays.toFixed(1)}</td>`;
+            }
+            
+            setupCellClickListeners() {
+                document.querySelectorAll('.editable').forEach(cell => {
+                    cell.addEventListener('click', (e) => {
+                        const empIndex = parseInt(e.target.getAttribute('data-emp'));
+                        const dateIndex = parseInt(e.target.getAttribute('data-date'));
+                        this.openAdjustmentModal(empIndex, dateIndex);
+                    });
+                });
+            }
+            
+            // ========== SUMMARY FUNCTIONS ==========
+            
+            updateSummary() {
+                const totalEmployees = this.attendanceData.length;
+                const totalDays = this.dates.length;
+                
+                let presentCount = 0;
+                let halfDayCount = 0;
+                let absentCount = 0;
+                let clCount = 0;
+                let mlCount = 0;
+                let brCount = 0;
+                
+                this.attendanceData.forEach(employee => {
+                    employee.attendance.forEach(attendance => {
+                        if (attendance?.status) {
+                            switch(attendance.status) {
+                                case 'P': presentCount++; break;
+                                case 'HD': halfDayCount++; break;
+                                case 'A': absentCount++; break;
+                                case 'CL': clCount++; break;
+                                case 'ML': mlCount++; break;
+                                case 'BR': brCount++; break;
+                            }
+                        }
+                    });
+                });
+                
+                const totalWorkingDays = this.calculateTotalWorkingDays();
+                
+                this.updateElementText('totalEmployees', totalEmployees);
+                this.updateElementText('totalDays', totalDays);
+                this.updateElementText('presentCount', presentCount);
+                this.updateElementText('halfDayCount', halfDayCount);
+                this.updateElementText('absentCount', absentCount);
+                this.updateElementText('workingDaysTotal', totalWorkingDays.toFixed(1));
+                this.updateElementText('workingDaysCount', totalWorkingDays.toFixed(1));
+            }
+            
+            updateDepartmentSummary() {
+                if (this.departments.size === 0) {
+                    this.elements.departmentSummary.innerHTML = `
+                        <h3>Department-wise Summary</h3>
+                        <p>No department data available in the uploaded file.</p>
+                    `;
+                    return;
+                }
+                
+                let html = '<h3>Department-wise Summary</h3><div style="overflow-x: auto;">';
+                html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+                html += '<thead><tr><th>Department</th><th>Employees</th><th>Present</th><th>Half Days</th><th>Absent</th><th>Working Days</th><th>Avg WD/Employee</th></tr></thead><tbody>';
+                
+                const departmentData = new Map();
+                
+                // Initialize department data
+                this.departments.forEach(dept => {
+                    departmentData.set(dept, {
+                        employees: 0,
+                        present: 0,
+                        halfDay: 0,
+                        absent: 0,
+                        cl: 0,
+                        ml: 0,
+                        br: 0
+                    });
+                });
+                
+                // Collect data
+                this.attendanceData.forEach(employee => {
+                    const dept = employee.department || 'Not Specified';
+                    if (!departmentData.has(dept)) {
+                        departmentData.set(dept, {
+                            employees: 0,
+                            present: 0,
+                            halfDay: 0,
+                            absent: 0,
+                            cl: 0,
+                            ml: 0,
+                            br: 0
+                        });
+                    }
+                    
+                    const data = departmentData.get(dept);
+                    data.employees++;
+                    
+                    employee.attendance.forEach(attendance => {
+                        if (attendance?.status) {
+                            switch(attendance.status) {
+                                case 'P': data.present++; break;
+                                case 'HD': data.halfDay++; break;
+                                case 'A': data.absent++; break;
+                                case 'CL': data.cl++; break;
+                                case 'ML': data.ml++; break;
+                                case 'BR': data.br++; break;
+                            }
+                        }
+                    });
+                });
+                
+                // Calculate and display
+                departmentData.forEach((data, dept) => {
+                    // CORRECTED FORMULA
+                    const workingDays = (data.present * 1) + 
+                                       (data.halfDay * 0.5) + 
+                                       (data.cl * 1) + 
+                                       (data.ml * 1) + 
+                                       (data.br * 1);
+                    
+                    const avgWorkingDays = data.employees > 0 ? (workingDays / data.employees).toFixed(1) : '0.0';
+                    
+                    html += `<tr>
+                        <td><strong>${dept}</strong></td>
+                        <td>${data.employees}</td>
+                        <td>${data.present}</td>
+                        <td>${data.halfDay}</td>
+                        <td>${data.absent}</td>
+                        <td><strong>${workingDays.toFixed(1)}</strong></td>
+                        <td>${avgWorkingDays}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                this.elements.departmentSummary.innerHTML = html;
+            }
+            
+            updateMonthlySummary() {
+                if (this.dates.length === 0) return;
+                
+                // Group by month
+                const monthlyData = new Map();
+                
+                this.attendanceData.forEach(employee => {
+                    employee.attendance.forEach((attendance, dateIndex) => {
+                        if (dateIndex >= this.dates.length) return;
+                        
+                        const date = this.parseDisplayDate(this.dates[dateIndex]);
+                        const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                        const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                        
+                        if (!monthlyData.has(monthYear)) {
+                            monthlyData.set(monthYear, {
+                                name: monthName,
+                                present: 0,
+                                halfDay: 0,
+                                absent: 0,
+                                cl: 0,
+                                ml: 0,
+                                br: 0,
+                                employees: new Set()
+                            });
+                        }
+                        
+                        const data = monthlyData.get(monthYear);
+                        data.employees.add(employee.name);
+                        
+                        if (attendance?.status) {
+                            switch(attendance.status) {
+                                case 'P': data.present++; break;
+                                case 'HD': data.halfDay++; break;
+                                case 'A': data.absent++; break;
+                                case 'CL': data.cl++; break;
+                                case 'ML': data.ml++; break;
+                                case 'BR': data.br++; break;
+                            }
+                        }
+                    });
+                });
+                
+                let html = '<h3>Monthly Attendance Summary</h3><div style="overflow-x: auto;">';
+                html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+                html += '<thead><tr><th>Month</th><th>Employees</th><th>Present</th><th>Half Days</th><th>Absent</th><th>Working Days</th><th>Attendance %</th></tr></thead><tbody>';
+                
+                // Sort months chronologically
+                const sortedMonths = Array.from(monthlyData.entries())
+                    .sort((a, b) => a[0].localeCompare(b[0]));
+                
+                sortedMonths.forEach(([monthKey, data]) => {
+                    // CORRECTED FORMULA
+                    const workingDays = (data.present * 1) + 
+                                       (data.halfDay * 0.5) + 
+                                       (data.cl * 1) + 
+                                       (data.ml * 1) + 
+                                       (data.br * 1);
+                    
+                    const totalPossibleDays = data.employees.size * this.getWorkingDaysInMonth(monthKey);
+                    const attendancePercentage = totalPossibleDays > 0 ? 
+                        ((workingDays / totalPossibleDays) * 100).toFixed(1) : '0.0';
+                    
+                    html += `<tr>
+                        <td><strong>${data.name}</strong></td>
+                        <td>${data.employees.size}</td>
+                        <td>${data.present}</td>
+                        <td>${data.halfDay}</td>
+                        <td>${data.absent}</td>
+                        <td><strong>${workingDays.toFixed(1)}</strong></td>
+                        <td>${attendancePercentage}%</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                this.elements.monthlySummary.innerHTML = html;
+            }
+            
+            getWorkingDaysInMonth(monthYear) {
+                // Simple calculation - assume 22 working days per month
+                return 22;
+            }
+            
+            updateEmployeeSummary() {
+                if (this.attendanceData.length === 0) return;
+                
+                let html = '<h3>Employee Performance Summary</h3><div style="overflow-x: auto;">';
+                html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+                html += '<thead><tr><th>Employee</th><th>Department</th><th>Working Days</th><th>Attendance %</th><th>P</th><th>HD</th><th>A</th><th>CL</th><th>ML</th><th>BR</th></tr></thead><tbody>';
+                
+                // Sort by working days (highest first)
+                const sortedEmployees = [...this.attendanceData].sort((a, b) => {
+                    const aWD = this.calculateEmployeeWorkingDays(a);
+                    const bWD = this.calculateEmployeeWorkingDays(b);
+                    return bWD - aWD;
+                });
+                
+                sortedEmployees.forEach(employee => {
+                    const summary = this.calculateEmployeeSummary(employee);
+                    const workingDays = this.calculateEmployeeWorkingDays(employee);
+                    const attendancePercentage = this.dates.length > 0 ? 
+                        (workingDays / this.dates.length * 100).toFixed(1) : '0.0';
+                    
+                    html += `<tr>
+                        <td><strong>${employee.name}</strong></td>
+                        <td>${employee.department || ''}</td>
+                        <td><strong>${workingDays.toFixed(1)}</strong></td>
+                        <td>${attendancePercentage}%</td>
+                        <td>${summary.P}</td>
+                        <td>${summary.HD}</td>
+                        <td>${summary.A}</td>
+                        <td>${summary.CL}</td>
+                        <td>${summary.ML}</td>
+                        <td>${summary.BR}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                this.elements.employeeSummary.innerHTML = html;
+            }
+            
+            // ========== CALCULATION FUNCTIONS (CORRECTED) ==========
+            
+            calculateEmployeeSummary(employee) {
+                const counts = { P: 0, HD: 0, A: 0, CL: 0, ML: 0, BR: 0 };
+                
+                employee.attendance.forEach(attendance => {
+                    if (attendance?.status && counts.hasOwnProperty(attendance.status)) {
+                        counts[attendance.status]++;
+                    } else {
+                        counts.A++; // Count unknown status as absent
+                    }
+                });
+                
+                return counts;
+            }
+            
+            calculateEmployeeWorkingDays(employee) {
+                const counts = this.calculateEmployeeSummary(employee);
+                
+                // CORRECTED FORMULA: Working Days = P + (HD × 0.5) + CL + ML + BR
+                // Absent days are NOT subtracted - they are simply 0 days
+                let workingDays = (counts.P * 1) + 
+                                 (counts.HD * 0.5) + 
+                                 (counts.CL * 1) + 
+                                 (counts.ML * 1) + 
+                                 (counts.BR * 1);
+                
+                // Working days cannot be negative
+                return Math.max(0, workingDays);
+            }
+            
+            calculateTotalWorkingDays(data = this.attendanceData) {
+                let totalWorkingDays = 0;
+                
+                data.forEach(employee => {
+                    totalWorkingDays += this.calculateEmployeeWorkingDays(employee);
+                });
+                
+                return totalWorkingDays;
+            }
+            
+            // ========== FILTER FUNCTIONS ==========
+            
+            applyFilters() {
+                const employeeFilter = this.elements.employeeFilter.value.toLowerCase();
+                const departmentFilter = this.elements.departmentFilter.value;
+                const statusFilter = this.elements.statusFilter.value;
+                const startDate = this.elements.startDateFilter.value ? new Date(this.elements.startDateFilter.value) : null;
+                const endDate = this.elements.endDateFilter.value ? new Date(this.elements.endDateFilter.value) : null;
+                
+                this.filteredData = this.attendanceData.filter(employee => {
+                    // Employee name filter
+                    if (employeeFilter && !employee.name.toLowerCase().includes(employeeFilter)) {
+                        return false;
+                    }
+                    
+                    // Department filter
+                    if (departmentFilter && employee.department !== departmentFilter) {
+                        return false;
+                    }
+                    
+                    // Status filter
+                    if (statusFilter) {
+                        const hasStatus = employee.attendance.some(attendance => 
+                            attendance?.status === statusFilter
+                        );
+                        if (!hasStatus) return false;
+                    }
+                    
+                    // Date range filter
+                    if (startDate || endDate) {
+                        const hasAttendanceInRange = employee.attendance.some((attendance, index) => {
+                            if (index >= this.dates.length) return false;
+                            
+                            const date = this.parseDisplayDate(this.dates[index]);
+                            
+                            if (startDate && date < startDate) return false;
+                            if (endDate && date > endDate) return false;
+                            
+                            return true;
+                        });
+                        
+                        if (!hasAttendanceInRange) return false;
+                    }
+                    
+                    return true;
+                });
+                
+                this.state.filtersApplied = true;
+                this.currentPage = 1;
+            }
+            
+            clearFilters() {
+                this.elements.employeeFilter.value = '';
+                this.elements.departmentFilter.value = '';
+                this.elements.statusFilter.value = '';
+                this.setDefaultDateFilters();
+                
+                this.applyFilters();
+                this.displayAttendanceTable();
+                this.showSuccess('Filters cleared!');
+            }
+            
+            updateDepartmentFilter() {
+                const select = this.elements.departmentFilter;
+                select.innerHTML = '<option value="">All Departments</option>';
+                
+                this.departments.forEach(dept => {
+                    if (dept) {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        select.appendChild(option);
+                    }
+                });
+            }
+            
+            setDefaultDateFilters() {
+                if (this.dates.length > 0) {
+                    const firstDate = this.parseDisplayDate(this.dates[0]);
+                    const lastDate = this.parseDisplayDate(this.dates[this.dates.length - 1]);
+                    
+                    const formatForInput = (date) => {
+                        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                    };
+                    
+                    this.elements.startDateFilter.value = formatForInput(firstDate);
+                    this.elements.endDateFilter.value = formatForInput(lastDate);
+                    this.elements.startDateFilter.min = formatForInput(firstDate);
+                    this.elements.endDateFilter.max = formatForInput(lastDate);
+                }
+            }
+            
+            // ========== MODAL FUNCTIONS ==========
+            
+            openAdjustmentModal(empIndex, dateIndex) {
+                if (empIndex < 0 || dateIndex < 0 || empIndex >= this.filteredData.length) return;
+                
+                this.currentEdit.employeeIndex = empIndex;
+                this.currentEdit.dateIndex = dateIndex;
+                
+                const employee = this.filteredData[empIndex];
+                const attendance = employee.attendance[dateIndex];
+                const date = this.dates[dateIndex];
+                
+                if (!attendance || !date) return;
+                
+                // Update modal info
+                this.elements.modalEmployeeInfo.textContent = `Employee: ${employee.name}`;
+                this.elements.modalDateInfo.textContent = `Date: ${date}`;
+                
+                // Set current status
+                this.elements.attendanceStatus.value = attendance.status;
+                
+                // Toggle branch code field
+                this.toggleBranchCodeField();
+                
+                // Set remarks and branch code
+                this.elements.remarks.value = attendance.details.remarks || '';
+                this.elements.branchCode.value = attendance.branchCode || '';
+                
+                // Show original punch data
+                this.showOriginalPunchData(attendance);
+                
+                // Show modal
+                this.elements.adjustmentModal.style.display = 'flex';
+            }
+            
+            toggleBranchCodeField() {
+                if (this.elements.attendanceStatus.value === 'BR') {
+                    this.elements.branchCodeGroup.style.display = 'block';
+                } else {
+                    this.elements.branchCodeGroup.style.display = 'none';
+                }
+            }
+            
+            showOriginalPunchData(attendance) {
+                const originalData = attendance.details;
+                let punchInfo = '';
+                
+                if (originalData.punches && originalData.punches.length > 0) {
+                    punchInfo += `Punches: ${originalData.punches.join(', ')}<br>`;
+                }
+                if (originalData.totalWorkingHrs) {
+                    punchInfo += `Total Hrs: ${originalData.totalWorkingHrs}<br>`;
+                    if (originalData.totalHoursDecimal >= 10.5) {
+                        punchInfo += `✓ 10.5+ hour rule applied<br>`;
+                    }
+                }
+                if (originalData.outPunch) {
+                    punchInfo += `OutPunch: ${originalData.outPunch}<br>`;
+                }
+                
+                if (punchInfo) {
+                    this.elements.originalPunchData.innerHTML = punchInfo + `Original Status: ${attendance.originalStatus}`;
+                } else {
+                    this.elements.originalPunchData.innerHTML = 'No punch data available<br>Original Status: ' + attendance.originalStatus;
+                }
+            }
+            
+            closeAdjustmentModal() {
+                this.elements.adjustmentModal.style.display = 'none';
+                this.currentEdit = { employeeIndex: -1, dateIndex: -1 };
+            }
+            
+            saveAdjustment() {
+                const empIndex = this.currentEdit.employeeIndex;
+                const dateIndex = this.currentEdit.dateIndex;
+                
+                if (empIndex < 0 || dateIndex < 0 || empIndex >= this.filteredData.length) return;
+                
+                const employee = this.filteredData[empIndex];
+                const attendance = employee.attendance[dateIndex];
+                
+                if (!attendance) return;
+                
+                // Update attendance
+                attendance.status = this.elements.attendanceStatus.value;
+                attendance.details.isManual = true;
+                attendance.details.remarks = this.sanitizeInput(this.elements.remarks.value);
+                
+                if (attendance.status === 'BR') {
+                    attendance.branchCode = this.sanitizeInput(this.elements.branchCode.value) || 'BR001';
+                } else {
+                    attendance.branchCode = '';
+                }
+                
+                // Close modal and refresh
+                this.closeAdjustmentModal();
+                this.displayAttendanceTable();
+                this.updateSummary();
+                this.updateEmployeeSummary();
+                this.saveToStorage();
+                this.showSuccess('Attendance adjustment saved!');
+            }
+            
+            resetToOriginal() {
+                const empIndex = this.currentEdit.employeeIndex;
+                const dateIndex = this.currentEdit.dateIndex;
+                
+                if (empIndex < 0 || dateIndex < 0 || empIndex >= this.filteredData.length) return;
+                
+                const employee = this.filteredData[empIndex];
+                const attendance = employee.attendance[dateIndex];
+                
+                if (!attendance) return;
+                
+                // Reset to original
+                attendance.status = attendance.originalStatus;
+                attendance.details.isManual = false;
+                attendance.details.remarks = '';
+                attendance.branchCode = '';
+                
+                this.closeAdjustmentModal();
+                this.displayAttendanceTable();
+                this.updateSummary();
+                this.updateEmployeeSummary();
+                this.saveToStorage();
+                this.showSuccess('Reset to original data!');
+            }
+            
+            // ========== PAGINATION FUNCTIONS ==========
+            
+            goToPage(page) {
+                if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+                
+                this.currentPage = page;
+                this.displayAttendanceTable();
+            }
+            
+            changePageSize() {
+                this.itemsPerPage = parseInt(this.elements.pageSize.value);
+                this.currentPage = 1;
+                this.displayAttendanceTable();
+            }
+            
+            updatePaginationControls() {
+                if (this.filteredData.length <= this.itemsPerPage) {
+                    this.elements.paginationControls.style.display = 'none';
+                    return;
+                }
+                
+                this.elements.paginationControls.style.display = 'flex';
+                this.elements.pageInfo.textContent = `Page ${this.currentPage} of ${this.totalPages}`;
+                
+                this.elements.firstPageBtn.disabled = this.currentPage === 1;
+                this.elements.prevPageBtn.disabled = this.currentPage === 1;
+                this.elements.nextPageBtn.disabled = this.currentPage === this.totalPages;
+                this.elements.lastPageBtn.disabled = this.currentPage === this.totalPages;
+            }
+            
+            // ========== TAB FUNCTIONS ==========
+            
+            switchTab(tabName) {
+                // Update tab buttons
+                this.elements.tabBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === tabName) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Update tab contents
+                this.elements.tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabName}Tab`) {
+                        content.classList.add('active');
+                    }
+                });
+                
+                // Refresh data if needed
+                if (tabName === 'department') {
+                    this.updateDepartmentSummary();
+                } else if (tabName === 'monthly') {
+                    this.updateMonthlySummary();
+                } else if (tabName === 'employee') {
+                    this.updateEmployeeSummary();
+                }
+            }
+            
+            // ========== EXPORT FUNCTIONS ==========
+            
+            downloadExcel() {
+                if (this.attendanceData.length === 0) {
+                    this.showError('No attendance data to download.');
+                    return;
+                }
+                
+                this.showLoader();
+                
+                try {
+                    const wb = XLSX.utils.book_new();
+                    wb.Props = {
+                        Title: "Attendance Report",
+                        Subject: "Employee Attendance Data",
+                        Author: "Attendance Calculator",
+                        CreatedDate: new Date()
+                    };
+                    
+                    // Create data array
+                    const excelData = [
+                        ["Attendance Report", "", "", "", "", "", "", "Generated: " + new Date().toLocaleDateString()],
+                        [],
+                        ["Emp Code", "Employee Name", "Department", ...this.dates, "P", "HD", "A", "CL", "ML", "BR", "Working Days"]
+                    ];
+                    
+                    // Add employee rows
+                    this.attendanceData.forEach(employee => {
+                        const counts = this.calculateEmployeeSummary(employee);
+                        const workingDays = this.calculateEmployeeWorkingDays(employee);
+                        
+                        const row = [
+                            employee.empCode || '',
+                            employee.name,
+                            employee.department || ''
+                        ];
+                        
+                        // Add attendance data
+                        employee.attendance.forEach(attendance => {
+                            if (attendance?.status === 'BR') {
+                                row.push(attendance.branchCode || 'BR');
+                            } else {
+                                row.push(attendance?.status || 'A');
+                            }
+                        });
+                        
+                        // Add summary
+                        row.push(
+                            counts.P,
+                            counts.HD,
+                            counts.A,
+                            counts.CL,
+                            counts.ML,
+                            counts.BR,
+                            workingDays.toFixed(1)
+                        );
+                        
+                        excelData.push(row);
+                    });
+                    
+                    // Add totals row
+                    const totals = this.calculateTotals();
+                    const totalRow = ['TOTAL', '', '', ...Array(this.dates.length).fill(''), 
+                                     totals.P, totals.HD, totals.A, totals.CL, totals.ML, totals.BR, 
+                                     this.calculateTotalWorkingDays().toFixed(1)];
+                    excelData.push(totalRow);
+                    
+                    // Add formula explanation
+                    excelData.push([]);
+                    excelData.push(['Working Days Formula:', '', '', ...Array(this.dates.length).fill(''), 
+                                   '=(P × 1) + (HD × 0.5) + (CL × 1) + (ML × 1) + (BR × 1)']);
+                    excelData.push(['Attendance Rules:', '', '', ...Array(this.dates.length).fill(''), 
+                                   '1. 4 punches (First ≤ 10:30 AM, Last ≤ 11:30 PM) = P']);
+                    excelData.push(['', '', '', ...Array(this.dates.length).fill(''), 
+                                   '2. 10.5+ hours worked (last punch until midnight) = P']);
+                    excelData.push(['', '', '', ...Array(this.dates.length).fill(''), 
+                                   '3. Only 2 punches = HD']);
+                    excelData.push(['', '', '', ...Array(this.dates.length).fill(''), 
+                                   '4. Missing/insufficient = A']);
+                    
+                    // Create worksheet
+                    const ws = XLSX.utils.aoa_to_sheet(excelData);
+                    
+                    // Set column widths
+                    const wscols = [
+                        { wch: 10 }, { wch: 25 }, { wch: 20 }, // Emp Code, Name, Department
+                        ...this.dates.map(() => ({ wch: 10 })), // Dates
+                        { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 12 } // Summary columns
+                    ];
+                    ws['!cols'] = wscols;
+                    
+                    // Add to workbook
+                    XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
+                    
+                    // Generate and download
+                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+                    const fileName = `Attendance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                    saveAs(blob, fileName);
+                    
+                    this.hideLoader();
+                    this.showSuccess('Excel report downloaded successfully!');
+                    
+                } catch (error) {
+                    this.handleExportError(error, 'Excel');
+                }
+            }
+            
+            downloadPdf() {
+                if (this.attendanceData.length === 0) {
+                    this.showError('No attendance data to download.');
+                    return;
+                }
+                
+                this.showLoader();
+                
+                try {
+                    const doc = new this.jsPDF({
+                        orientation: 'landscape',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    
+                    // Header
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('ATTENDANCE REPORT', pageWidth / 2, 15, { align: 'center' });
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 22, { align: 'center' });
+                    
+                    // Summary
+                    const totals = this.calculateTotals();
+                    const totalWD = this.calculateTotalWorkingDays();
+                    
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('SUMMARY', 15, 30);
+                    
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Total Employees: ${this.attendanceData.length}`, 15, 37);
+                    doc.text(`Total Days: ${this.dates.length}`, 15, 42);
+                    doc.text(`Present (P): ${totals.P}`, 50, 37);
+                    doc.text(`Half Days (HD): ${totals.HD}`, 50, 42);
+                    doc.text(`Absent (A): ${totals.A}`, 85, 37);
+                    doc.text(`Working Days: ${totalWD.toFixed(1)}`, 85, 42);
+                    
+                    // Create table data (limited to first 50 employees for PDF)
+                    const tableData = [];
+                    const displayData = this.attendanceData.slice(0, 50);
+                    
+                    displayData.forEach(employee => {
+                        const counts = this.calculateEmployeeSummary(employee);
+                        const workingDays = this.calculateEmployeeWorkingDays(employee);
+                        
+                        const row = {
+                            empCode: employee.empCode || '',
+                            name: employee.name,
+                            department: employee.department || '',
+                            ...this.getAttendanceSummaryString(employee),
+                            pCount: counts.P,
+                            hdCount: counts.HD,
+                            aCount: counts.A,
+                            clCount: counts.CL,
+                            mlCount: counts.ML,
+                            brCount: counts.BR,
+                            workingDays: workingDays.toFixed(1)
+                        };
+                        
+                        tableData.push(row);
+                    });
+                    
+                    // Add table
+                    doc.autoTable({
+                        head: [['Emp Code', 'Name', 'Department', 'Attendance Summary', 'P', 'HD', 'A', 'CL', 'ML', 'BR', 'WD']],
+                        body: tableData.map(row => [
+                            row.empCode, row.name, row.department, row.attendanceSummary,
+                            row.pCount, row.hdCount, row.aCount, row.clCount, row.mlCount, row.brCount, row.workingDays
+                        ]),
+                        startY: 50,
+                        margin: { left: 10, right: 10 },
+                        headStyles: { 
+                            fillColor: [44, 62, 80],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold'
+                        },
+                        bodyStyles: { fontSize: 7 },
+                        alternateRowStyles: { fillColor: [249, 249, 249] },
+                        didDrawPage: (data) => {
+                            if (data.pageCount === data.pageNumber) {
+                                doc.setFontSize(8);
+                                doc.setFont('helvetica', 'italic');
+                                const footer = `Working Days Formula: (P×1) + (HD×0.5) + (CL×1) + (ML×1) + (BR×1)`;
+                                doc.text(footer, pageWidth / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
+                                doc.setFontSize(7);
+                                doc.text(`Rules: 1. 4 punches (First ≤ 10:30, Last ≤ 11:30) = P | 2. 10.5+ hours (until midnight) = P | 3. 2 punches = HD`, 
+                                        pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+                            }
+                        }
+                    });
+                    
+                    // Save PDF
+                    const fileName = `Attendance_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+                    doc.save(fileName);
+                    
+                    this.hideLoader();
+                    this.showSuccess('PDF report downloaded successfully!');
+                    
+                } catch (error) {
+                    this.handleExportError(error, 'PDF');
+                }
+            }
+            
+            getAttendanceSummaryString(employee) {
+                const counts = this.calculateEmployeeSummary(employee);
+                return `P:${counts.P} HD:${counts.HD} A:${counts.A} CL:${counts.CL} ML:${counts.ML} BR:${counts.BR}`;
+            }
+            
+            calculateTotals() {
+                const totals = { P: 0, HD: 0, A: 0, CL: 0, ML: 0, BR: 0 };
+                
+                this.attendanceData.forEach(employee => {
+                    const counts = this.calculateEmployeeSummary(employee);
+                    Object.keys(totals).forEach(key => {
+                        totals[key] += counts[key];
+                    });
+                });
+                
+                return totals;
+            }
+            
+            // ========== STORAGE FUNCTIONS ==========
+            
+            saveToStorage() {
+                try {
+                    const data = {
+                        attendanceData: this.attendanceData,
+                        dates: this.dates,
+                        employees: this.employees,
+                        departments: Array.from(this.departments),
+                        state: this.state,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Store in localStorage (limited to 5MB)
+                    const dataStr = JSON.stringify(data);
+                    if (dataStr.length > 5 * 1024 * 1024) {
+                        console.warn('Data too large for localStorage');
+                        return;
+                    }
+                    
+                    localStorage.setItem('attendanceData', dataStr);
+                } catch (error) {
+                    console.warn('Failed to save to localStorage:', error);
+                }
+            }
+            
+            loadFromStorage() {
+                try {
+                    const savedData = localStorage.getItem('attendanceData');
+                    if (!savedData) return;
+                    
+                    const data = JSON.parse(savedData);
+                    
+                    // Check if data is less than 24 hours old
+                    const savedTime = new Date(data.timestamp);
+                    const currentTime = new Date();
+                    const hoursDiff = (currentTime - savedTime) / (1000 * 60 * 60);
+                    
+                    if (hoursDiff > 24) {
+                        localStorage.removeItem('attendanceData');
+                        return;
+                    }
+                    
+                    // Restore data
+                    this.attendanceData = data.attendanceData || [];
+                    this.dates = data.dates || [];
+                    this.employees = data.employees || [];
+                    this.departments = new Set(data.departments || []);
+                    this.state = data.state || { fileLoaded: false, dataProcessed: false };
+                    
+                    if (this.state.dataProcessed && this.attendanceData.length > 0) {
+                        this.filteredData = [...this.attendanceData];
+                        this.displayAttendanceTable();
+                        this.updateSummary();
+                        this.updateDepartmentSummary();
+                        this.updateMonthlySummary();
+                        this.updateEmployeeSummary();
+                        this.showResultSections();
+                        this.elements.downloadExcelBtn.disabled = false;
+                        this.elements.downloadPdfBtn.disabled = false;
+                        this.elements.quickExcelBtn.disabled = false;
+                        this.elements.quickPdfBtn.disabled = false;
+                        
+                        this.updateDepartmentFilter();
+                        this.setDefaultDateFilters();
+                        
+                        this.showSuccess('Previous session restored from local storage.');
+                    }
+                    
+                } catch (error) {
+                    console.warn('Failed to load from localStorage:', error);
+                    localStorage.removeItem('attendanceData');
+                }
+            }
+            
+            // ========== UI HELPER FUNCTIONS ==========
+            
+            createAttendanceDataArray(employeeMap) {
+                this.attendanceData = Array.from(employeeMap.values())
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(employee => {
+                        const attendanceArray = this.dates.map(date => {
+                            const attendance = employee.attendance.get(date);
+                            return attendance || {
+                                status: 'A',
+                                originalStatus: 'A',
+                                details: {
+                                    punches: [],
+                                    totalWorkingHrs: '',
+                                    totalHoursDecimal: 0,
+                                    outPunch: '',
+                                    loginTime: '',
+                                    logoutTime: '',
+                                    lateBy: '',
+                                    earlyGoing: '',
+                                    isManual: false,
+                                    remarks: ''
+                                },
+                                branchCode: '',
+                                dateObj: this.parseDisplayDate(date)
+                            };
+                        });
+                        
+                        return {
+                            empCode: employee.empCode,
+                            name: employee.name,
+                            department: employee.department || 'Not Specified',
+                            attendance: attendanceArray
+                        };
+                    });
+            }
+            
+            showResultSections() {
+                this.elements.resultSection.style.display = 'block';
+                this.elements.summarySection.style.display = 'flex';
+                this.elements.filterSection.style.display = 'flex';
+                this.elements.formatOptions.style.display = 'flex';
+                this.elements.tabNavigation.style.display = 'flex';
+            }
+            
+            showSuccess(message) {
+                this.elements.successMessage.textContent = message;
+                this.elements.successMessage.style.display = 'block';
+                this.elements.errorMessage.style.display = 'none';
+                
+                setTimeout(() => {
+                    this.elements.successMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            showError(message) {
+                this.elements.errorMessage.textContent = message;
+                this.elements.errorMessage.style.display = 'block';
+                this.elements.successMessage.style.display = 'none';
+            }
+            
+            showLoader() {
+                this.elements.downloadLoader.style.display = 'block';
+            }
+            
+            hideLoader() {
+                this.elements.downloadLoader.style.display = 'none';
+            }
+            
+            updateElementText(elementId, text) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = text;
+                }
+            }
+            
+            // ========== ERROR HANDLING ==========
+            
+            handleProcessingError(error) {
+                let errorMessage = 'Error processing file: ';
+                
+                if (error.message.includes('empty') || error.message.includes('insufficient')) {
+                    errorMessage += 'The file appears to be empty or has insufficient data.';
+                } else if (error.message.includes('column not found')) {
+                    errorMessage += 'Required columns not found. Please check file format.';
+                } else if (error.message.includes('corrupt')) {
+                    errorMessage += 'The file appears to be corrupt. Please try another file.';
+                } else if (error.message.includes('reading')) {
+                    errorMessage += 'Error reading the file. Please try again.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                this.showError(errorMessage);
+                console.error('Processing error:', error);
+            }
+            
+            handleExportError(error, type) {
+                this.hideLoader();
+                this.showError(`Error downloading ${type} report: ${error.message}`);
+                console.error(`${type} export error:`, error);
+            }
+            
+            // ========== INPUT SANITIZATION ==========
+            
+            sanitizeInput(input) {
+                return input.replace(/[<>]/g, '').trim();
+            }
+            
+            // ========== KEYBOARD SHORTCUTS ==========
+            
+            handleKeyboardShortcuts(e) {
+                // Ctrl + S to save in modal
+                if (e.ctrlKey && e.key === 's' && this.elements.adjustmentModal.style.display === 'flex') {
+                    e.preventDefault();
+                    this.saveAdjustment();
+                }
+                
+                // Escape to close modal
+                if (e.key === 'Escape' && this.elements.adjustmentModal.style.display === 'flex') {
+                    this.closeAdjustmentModal();
+                }
+                
+                // Ctrl + F to focus filter
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    this.elements.employeeFilter.focus();
+                }
+                
+                // Ctrl + E for Excel download
+                if (e.ctrlKey && e.key === 'e' && !this.elements.downloadExcelBtn.disabled) {
+                    e.preventDefault();
+                    this.downloadExcel();
+                }
+                
+                // Ctrl + P for PDF download
+                if (e.ctrlKey && e.key === 'p' && !this.elements.downloadPdfBtn.disabled) {
+                    e.preventDefault();
+                    this.downloadPdf();
+                }
+            }
+            
+            // ========== RESET FUNCTION ==========
+            
+            resetApp() {
+                if (confirm('Are you sure you want to reset? All data will be lost.')) {
+                    this.elements.fileInput.value = '';
+                    this.attendanceData = [];
+                    this.dates = [];
+                    this.employees = [];
+                    this.filteredData = [];
+                    this.departments = new Set();
+                    
+                    // Reset UI
+                    this.elements.uploadArea.innerHTML = `
+                        <div class="upload-icon">📊</div>
+                        <p class="upload-text">Drag & drop your Excel punching report here or click to browse</p>
+                        <p class="upload-note">Supported formats: Excel files (.xlsx, .xls) up to 10MB</p>
+                    `;
+                    
+                    this.elements.tableContainer.innerHTML = '';
+                    this.elements.resultSection.style.display = 'none';
+                    this.elements.summarySection.style.display = 'none';
+                    this.elements.filterSection.style.display = 'none';
+                    this.elements.formatOptions.style.display = 'none';
+                    this.elements.tabNavigation.style.display = 'none';
+                    
+                    this.showError('');
+                    this.showSuccess('');
+                    
+                    this.elements.downloadExcelBtn.disabled = true;
+                    this.elements.downloadPdfBtn.disabled = true;
+                    this.elements.quickExcelBtn.disabled = true;
+                    this.elements.quickPdfBtn.disabled = true;
+                    
+                    this.elements.processBtn.disabled = true;
+                    this.elements.processBtn.innerHTML = '📊 Process Attendance';
+                    
+                    // Clear filters
+                    this.elements.employeeFilter.value = '';
+                    this.elements.departmentFilter.innerHTML = '<option value="">All Departments</option>';
+                    this.elements.statusFilter.value = '';
+                    this.elements.startDateFilter.value = '';
+                    this.elements.endDateFilter.value = '';
+                    
+                    // Reset modal
+                    this.closeAdjustmentModal();
+                    
+                    // Clear storage
+                    localStorage.removeItem('attendanceData');
+                    
+                    // Reset state
+                    this.state = {
+                        fileLoaded: false,
+                        dataProcessed: false,
+                        filtersApplied: false
+                    };
+                    
+                    this.currentPage = 1;
+                    this.itemsPerPage = 50;
+                    
+                    this.showSuccess('Application reset successfully.');
+                }
+            }
+        }
+        
+        // Initialize application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.attendanceApp = new AttendanceCalculator();
+        });
+    </script>
+</body>
+</html>
